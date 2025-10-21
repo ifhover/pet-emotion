@@ -17,7 +17,6 @@ import { AuthModule } from './modules/auth/auth.module';
 
 // 存放业务模块
 const modules = [UserModule, MenuModule, VerifyCodeModule, TaskModule, AuthModule];
-
 @Module({
   providers: [
     {
@@ -36,11 +35,7 @@ const modules = [UserModule, MenuModule, VerifyCodeModule, TaskModule, AuthModul
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: [
-        process.env.NODE_ENV === 'production' ? '.env.production' : '.env.development',
-        '.env.local',
-        '.env',
-      ],
+      envFilePath: ['.env.local', '.env'],
     }),
     BullModule.forRootAsync({
       useFactory: (configService: ConfigService) => ({
