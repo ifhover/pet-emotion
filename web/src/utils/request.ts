@@ -1,5 +1,5 @@
 import JsCookie from "js-cookie";
-import { getServerToken } from "./token";
+import { getServerToken, removeServerToken } from "./token";
 import qs from "qs";
 import { Status } from "@/type/common";
 import { antdHelper } from "./antd-helper";
@@ -9,6 +9,13 @@ export async function getToken() {
     return getServerToken();
   }
   return JsCookie.get("token");
+}
+
+export async function removeToken() {
+  if (typeof window === "undefined") {
+    await removeServerToken();
+  }
+  JsCookie.remove("token");
 }
 
 export type RequestOptions = Omit<RequestInit, "body" | "headers"> & {
@@ -44,11 +51,6 @@ async function _request<T>(url: string, options?: RequestOptions): Promise<T> {
       const { message } = await res.json();
       if (message) {
         msg = message;
-      }
-    }
-    if (res.status === Status.Unauthorized) {
-      if (typeof window !== "undefined") {
-        window.location.href = "/auth/login?message=登录已过期，请重新登录";
       }
     }
     antdHelper.message?.error(msg);

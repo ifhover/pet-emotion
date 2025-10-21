@@ -19,7 +19,7 @@ export default function RootLayout({
   const colorPrimary = "#49cada";
   const style = useMemo(() => {
     return {
-      "--color-primary-50": color(colorPrimary).lighten(0.8).hex(),
+      "--color-primary-50": color(colorPrimary).lighten(0.7).hex(),
       "--color-primary-100": color(colorPrimary).lighten(0.6).hex(),
       "--color-primary-200": color(colorPrimary).lighten(0.5).hex(),
       "--color-primary-300": color(colorPrimary).lighten(0.4).hex(),

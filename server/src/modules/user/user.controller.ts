@@ -1,11 +1,9 @@
-import { Controller, Get, Post, Body } from '@nestjs/common';
+import { Controller, Get, Post, Body, Req } from '@nestjs/common';
 import { UserService } from './user.service';
 import { UserLoginDto } from './dto/user-login.dto';
 import { UserRegisterDto } from './dto/user-register.dto';
-import { FromUser } from '@/common/decorator/user.decorator';
-import { User } from './entities/user.entities';
 import { UserCheckEmailDto } from './dto/user-check-email.dto';
-import { Public } from '@/common/decorator/public.decoratot';
+import { Public } from '@/common/decorator/public.decorator';
 
 @Controller('user')
 export class UserController {
@@ -30,7 +28,12 @@ export class UserController {
   }
 
   @Get('my-detail')
-  public myDetail(@FromUser() user: User) {
-    return user;
+  @Public()
+  public async myDetail(@Req() req: Request) {
+    const token = this.userService.extractTokenFromHeader(req);
+    if (token) {
+      return await this.userService.myDetail(token);
+    }
+    return null;
   }
 }

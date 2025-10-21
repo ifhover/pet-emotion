@@ -12,6 +12,6 @@ export const userApi = {
     return request.post<void>("/user/register", data);
   },
   my_detail: () => {
-    return request.get<User>("/user/my-detail");
+    return request.get<User | null>("/user/my-detail");
   },
 };

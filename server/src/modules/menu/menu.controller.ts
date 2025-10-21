@@ -1,9 +1,11 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param } from '@nestjs/common';
 import { MenuService } from './menu.service';
 import { CreateMenuDto } from './dto/create-menu.dto';
 import { UpdateMenuDto } from './dto/update-menu.dto';
+import { Role } from '@/common/decorator/role.decorator';
 
 @Controller('menu')
+@Role('admin')
 export class MenuController {
   constructor(private readonly menuService: MenuService) {}
 

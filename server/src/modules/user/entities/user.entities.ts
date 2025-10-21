@@ -1,6 +1,8 @@
-export class User {
-  public id: string;
-  public email: string;
-  public created_at: Date;
-  public updated_at: Date;
-}
+export type UserEntities = {
+  id: string;
+  email: string | null;
+  role: string;
+  gen_limit: number;
+  created_at: Date;
+  updated_at: Date;
+};

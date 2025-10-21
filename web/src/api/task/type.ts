@@ -21,11 +21,26 @@ export type TaskResult = {
     breed: string;
     tags: string[];
     emotion_condition: string;
-    emotions: {
-      happiness: number;
-      curiosity: number;
-      alertness: number;
-      fatigue: number;
+    emotion: {
+      score: 0;
+      level: string;
+      desc: string;
+      confidence: 0;
+      emoji: string;
+    };
+    BCS: {
+      score: 0;
+      level: string;
+      desc: string;
+      confidence: 0;
+      emoji: string;
+    };
+    comfort: {
+      score: 0;
+      level: string;
+      desc: string;
+      confidence: 0;
+      emoji: string;
     };
     health: {
       body_condition: string;
@@ -35,4 +50,14 @@ export type TaskResult = {
     };
     summary: string;
   }>;
+};
+
+export type TaskListReq = {
+  status?: TaskStatus;
+  grade?: number;
+};
+
+export type TaskUpdateReq = {
+  id: string;
+  grade?: number;
 };

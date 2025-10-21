@@ -1,0 +1,1 @@
+ALTER TABLE "task" ADD COLUMN "grade" integer DEFAULT 0;

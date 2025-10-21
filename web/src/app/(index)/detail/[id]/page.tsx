@@ -1,16 +1,19 @@
 "use client";
 
 import { taskApi } from "@/api/task";
-import { useTask } from "@/api/task/hook";
+import { useTask, useTaskGenLimit } from "@/api/task/hook";
 import { TaskResult, TaskStatus } from "@/api/task/type";
-import { Skeleton, Space, Spin } from "antd";
+import { Button, Result, Skeleton } from "antd";
 import { use, useEffect, useMemo } from "react";
 import PetResult from "./_components/PetResult";
 import PetLoading from "./_components/PetLoading";
+import Link from "next/link";
+import NotFoundPet from "./_components/NotFoundPet";
 
 export default function DetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const { data, refetch, isPending } = useTask(id);
+  const { refetch: refetchGenLimit } = useTaskGenLimit();
 
   useEffect(() => {
     let eventSource: EventSource;
@@ -20,6 +23,7 @@ export default function DetailPage({ params }: { params: Promise<{ id: string }>
         const eventData = JSON.parse(event.data) as { type: string; id: string };
         if (eventData.type === "completed") {
           refetch();
+          refetchGenLimit();
           eventSource.close();
         }
       };
@@ -43,13 +47,21 @@ export default function DetailPage({ params }: { params: Promise<{ id: string }>
           <Skeleton active />
         ) : data?.status === TaskStatus.Processing ? (
           <PetLoading path={data?.path} />
-        ) : data?.status && data.status === TaskStatus.Ok && result ? (
+        ) : data?.status && data.status === TaskStatus.Ok && result?.pets.length ? (
           <PetResult data={result} path={data?.path} />
+        ) : data?.status === TaskStatus.Ok && result?.pets.length === 0 ? (
+          <NotFoundPet path={data.path}></NotFoundPet>
         ) : (
-          <div className="text-center text-base">
-            <div className="text-red-500 font-bold mb-4">分析失败</div>
-            {data?.error_message}
-          </div>
+          <Result
+            status="error"
+            title="分析出错了！"
+            subTitle={data?.error_message || "未知错误"}
+            extra={
+              <Link href="/">
+                <Button type="primary">返回</Button>
+              </Link>
+            }
+          />
         )}
       </div>
     </div>

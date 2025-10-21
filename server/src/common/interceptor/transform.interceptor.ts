@@ -13,7 +13,7 @@ export class TransformInterceptor<T> implements NestInterceptor<T> {
 
     return next.handle().pipe(
       map((data) => {
-        if (['string', 'number', 'boolean'].includes(typeof data)) {
+        if (['string', 'number', 'boolean'].includes(typeof data) || data === null) {
           response.header('Content-Type', 'application/json');
           return JSON.stringify(data);
         }

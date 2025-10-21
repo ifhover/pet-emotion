@@ -3,26 +3,35 @@ import { pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
 import { v7 } from 'uuid';
 import { VerifyCodeBizType, VerifyCodeChannel } from '@/common/type/dict';
 import { TaskStatus } from '@/common/type/dict';
+import { integer } from 'drizzle-orm/pg-core';
 
 export const user = pgTable('user', {
-  id: uuid('id')
+  id: uuid()
     .primaryKey()
     .$defaultFn(() => v7()),
-  email: text('email').notNull(),
-  password: text('password').notNull(),
-  created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-  updated_at: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  email: text(),
+  password: text(),
+  google_id: text(),
+  role: text().notNull().default('user'),
+  gen_limit: integer().notNull().default(5),
+  created_at: timestamp({ withTimezone: true }).notNull().defaultNow(),
+  updated_at: timestamp({ withTimezone: true }).notNull().defaultNow(),
 });
 
+export const userRelations = relations(user, ({ many }) => ({
+  tokens: many(token),
+  tasks: many(task),
+}));
+
 export const token = pgTable('token', {
-  id: uuid('id')
+  id: uuid()
     .primaryKey()
     .$defaultFn(() => v7()),
-  user_id: uuid('user_id').references(() => user.id),
-  token: text('token').notNull(),
-  expired_at: timestamp('expired_at', { withTimezone: true }).notNull(),
-  created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-  updated_at: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  user_id: uuid(),
+  token: text().notNull(),
+  expired_at: timestamp({ withTimezone: true }).notNull(),
+  created_at: timestamp({ withTimezone: true }).notNull().defaultNow(),
+  updated_at: timestamp({ withTimezone: true }).notNull().defaultNow(),
 });
 
 export const tokenRelations = relations(token, ({ one }) => ({
@@ -33,7 +42,7 @@ export const tokenRelations = relations(token, ({ one }) => ({
 }));
 
 export const verifyCode = pgTable('verify_code', {
-  id: uuid('id')
+  id: uuid()
     .primaryKey()
     .$defaultFn(() => v7()),
   channel: text().notNull().$type<VerifyCodeChannel>(),
@@ -50,33 +59,43 @@ export const verifyCode = pgTable('verify_code', {
 });
 
 export const menu = pgTable('menu', {
-  id: uuid('id')
+  id: uuid()
     .primaryKey()
     .$defaultFn(() => v7()),
-  pid: uuid('pid'),
-  name: text('name').notNull(),
-  path: text('path').notNull(),
-  created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-  updated_at: timestamp('updated_at', { withTimezone: true })
+  pid: uuid(),
+  name: text().notNull(),
+  path: text().notNull(),
+  created_at: timestamp({ withTimezone: true }).notNull().defaultNow(),
+  updated_at: timestamp({ withTimezone: true })
     .notNull()
     .defaultNow()
     .$onUpdate(() => new Date()),
 });
 
 export const task = pgTable('task', {
-  id: uuid('id')
+  id: uuid()
     .primaryKey()
     .$defaultFn(() => v7()),
-  path: text('path').notNull(),
-  status: text('status')
+  path: text().notNull(),
+  status: text()
     .notNull()
     .$type<TaskStatus>()
     .$default(() => TaskStatus.Processing),
-  error_message: text('error_message').notNull().default(''),
-  result: text('result'),
-  created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-  updated_at: timestamp('updated_at', { withTimezone: true })
+  error_message: text(),
+  result: text(),
+  user_id: text(),
+  ip: text(),
+  grade: integer().default(0),
+  created_at: timestamp({ withTimezone: true }).notNull().defaultNow(),
+  updated_at: timestamp({ withTimezone: true })
     .notNull()
     .defaultNow()
     .$onUpdate(() => new Date()),
 });
+
+const taskRelations = relations(task, ({ one }) => ({
+  user: one(user, {
+    fields: [task.user_id],
+    references: [user.id],
+  }),
+}));

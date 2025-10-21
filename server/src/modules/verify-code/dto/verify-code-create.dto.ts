@@ -11,6 +11,5 @@ export class VerifyCodeCreateDto {
   @IsNotEmpty()
   public channel: VerifyCodeChannel = VerifyCodeChannel.邮箱;
 
-  @IsNotEmpty()
   public turnstile_token: string;
 }

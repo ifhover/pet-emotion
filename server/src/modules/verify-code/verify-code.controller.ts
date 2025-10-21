@@ -1,7 +1,7 @@
 import { Controller, Post, Body } from '@nestjs/common';
 import { VerifyCodeService } from './verify-code.service';
 import { VerifyCodeCreateDto } from './dto/verify-code-create.dto';
-import { Public } from '@/common/decorator/public.decoratot';
+import { Public } from '@/common/decorator/public.decorator';
 
 @Controller('verify-code')
 export class VerifyCodeController {

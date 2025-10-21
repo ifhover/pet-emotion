@@ -1,7 +1,14 @@
 import { UserService } from '@/modules/user/user.service';
-import { Injectable, CanActivate, ExecutionContext, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  CanActivate,
+  ExecutionContext,
+  UnauthorizedException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { IS_PUBLIC_KEY } from '@/common/decorator/public.decoratot';
+import { IS_PUBLIC_KEY } from '@/common/decorator/public.decorator';
+import { ROLE_KEY } from '../decorator/role.decorator';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -19,21 +26,18 @@ export class AuthGuard implements CanActivate {
       return true;
     }
     const request = context.switchToHttp().getRequest();
-    const token = this.extractTokenFromHeader(request);
-    if (!token) {
-      throw new UnauthorizedException();
-    }
-
-    const payload = await this.userService.getByToken(token);
+    const payload = await this.userService.getByRequest(request);
     if (!payload) {
       throw new UnauthorizedException();
     }
+    const requiredRole = this.reflector.getAllAndOverride<string>(ROLE_KEY, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
+    if (requiredRole && payload.role !== requiredRole) {
+      throw new ForbiddenException();
+    }
     request['user'] = payload;
     return true;
-  }
-
-  private extractTokenFromHeader(request: Request): string | undefined {
-    const [type, token] = request.headers['authorization']?.split(' ') ?? [];
-    return type === 'Bearer' ? token : undefined;
   }
 }

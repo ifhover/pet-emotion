@@ -10,7 +10,7 @@ export type PageRequest<T extends Record<string, unknown> = {}> = T & {
 };
 
 export type PageData<T = {}> = {
-  data: T[];
+  list: T[];
   page_size: number;
   page_index: number;
   total: number;

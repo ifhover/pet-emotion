@@ -13,9 +13,10 @@ import { TransformInterceptor } from './common/interceptor/transform.interceptor
 import { TaskModule } from './modules/task/task.module';
 import { S3Module } from './infrastructure/s3/s3.module';
 import { BullModule } from '@nestjs/bullmq';
+import { AuthModule } from './modules/auth/auth.module';
 
 // 存放业务模块
-const modules = [UserModule, MenuModule, VerifyCodeModule, TaskModule];
+const modules = [UserModule, MenuModule, VerifyCodeModule, TaskModule, AuthModule];
 
 @Module({
   providers: [
@@ -35,7 +36,11 @@ const modules = [UserModule, MenuModule, VerifyCodeModule, TaskModule];
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: ['.env.local', '.env'],
+      envFilePath: [
+        process.env.NODE_ENV === 'production' ? '.env.production' : '.env.development',
+        '.env.local',
+        '.env',
+      ],
     }),
     BullModule.forRootAsync({
       useFactory: (configService: ConfigService) => ({

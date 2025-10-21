@@ -55,42 +55,61 @@ export class VerifyCodeService {
   }
 
   public async create(dto: VerifyCodeCreateDto) {
-    if (dto.turnstile_token) {
-      if (!(await this.turnstileService.verify(dto.turnstile_token))) {
-        throw new BusinessError('验证失败，请重试');
-      }
-    }
-
     if (dto.channel === VerifyCodeChannel.邮箱) {
       if (!z.email().safeParse(dto.receiver).success) {
         throw new BusinessError('邮箱格式不正确');
       }
     }
 
-    // 检查是否有未过期的验证码
-    const existingCode = await this.db.query.verifyCode.findFirst({
+    // 查询符合条件的验证码
+    const verifyRecord = await this.db.query.verifyCode.findFirst({
       where: and(
         eq(verifyCode.receiver, dto.receiver),
         eq(verifyCode.channel, dto.channel),
+        eq(verifyCode.biz_type, dto.bizType),
         isNull(verifyCode.used_at),
       ),
       orderBy: (data, { desc }) => [desc(data.created_at)],
     });
 
-    const now = dayjs();
-    // 如果存在未过期的验证码，且距离上次发送不足1分钟，则拒绝重复发送
-    if (existingCode && dayjs(existingCode.expired_at).isAfter(now)) {
-      const timeDiff = now.diff(dayjs(existingCode.created_at), 'minute');
-      if (timeDiff < 1) {
-        throw new BusinessError('验证码发送过于频繁，请稍后再试');
+    // 允许15分钟内直接重新发送验证码，如果超过15分钟，则需要重新验证
+    if (
+      (verifyRecord?.created_at && dayjs().diff(dayjs(verifyRecord.created_at), 'minute') > 15) ||
+      !verifyRecord
+    ) {
+      const result = await this.turnstileService.verify(dto.turnstile_token);
+      if (!result) {
+        throw new BusinessError('验证失败，请重试');
       }
     }
 
+    // 如果存在未过期的验证码，且距离上次发送不足1分钟，则拒绝重复发送
+    if (verifyRecord && dayjs().diff(dayjs(verifyRecord.created_at), 'minute') < 1) {
+      throw new BusinessError('验证码发送过于频繁，请稍后再试');
+    }
+
+    // 生成验证码
     let code = Math.floor(100000 + Math.random() * 900000).toString();
-    const expiredAt = now.add(10, 'minute').toDate();
+    // 设置验证码过期时间
+    const expiredAt = dayjs().add(10, 'minute').toDate();
 
     try {
       await this.db.transaction(async (tx) => {
+        // 将未使用的验证码设为过期
+        await this.db
+          .update(verifyCode)
+          .set({
+            expired_at: dayjs().toDate(),
+          })
+          .where(
+            and(
+              eq(verifyCode.receiver, dto.receiver),
+              eq(verifyCode.channel, dto.channel),
+              eq(verifyCode.biz_type, dto.bizType),
+              isNull(verifyCode.used_at),
+            ),
+          );
+
         // 保存验证码到数据库
         await tx.insert(verifyCode).values({
           biz_type: dto.bizType,
@@ -104,7 +123,7 @@ export class VerifyCodeService {
           // 发送邮件
           await this.emailService.send({
             to: dto.receiver,
-            subject: '【FlowSite】注册验证码',
+            subject: '【Pet.Goee.Net】注册验证码',
             text: this.generateHTML(code, 10),
           });
         }

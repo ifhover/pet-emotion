@@ -10,9 +10,11 @@ import { v7 } from 'uuid';
 import { VerifyCodeBizType, VerifyCodeChannel } from '@/common/type/dict';
 import { VerifyCodeService } from '../verify-code/verify-code.service';
 import { UserRegisterDto } from './dto/user-register.dto';
-import { User } from './entities/user.entities';
+import { UserEntities } from './entities/user.entities';
 import { UserCheckEmailDto } from './dto/user-check-email.dto';
 import { TurnstileService } from '@/infrastructure/turnstile/turnstile.service';
+import { GoogleProfileEntities } from '../auth/entities/google-profile.entities';
+import { UserDetailEntities } from './entities/user-detail.entities';
 
 @Injectable()
 export class UserService {
@@ -23,6 +25,22 @@ export class UserService {
     private readonly verifyCodeService: VerifyCodeService,
     private readonly turnstileService: TurnstileService,
   ) {}
+
+  public async createToken(
+    userId: string,
+    expired_at: Date = dayjs().add(7, 'day').toDate(),
+  ): Promise<string> {
+    return (
+      await this.db
+        .insert(token)
+        .values({
+          user_id: userId,
+          token: v7(),
+          expired_at,
+        })
+        .returning()
+    )[0].token;
+  }
 
   public async login(dto: UserLoginDto): Promise<string> {
     if (!(await this.turnstileService.verify(dto.turnstile_token))) {
@@ -50,16 +68,7 @@ export class UserService {
       .where(eq(token.user_id, userResult.id));
 
     // 创建新token，并正确关联用户ID
-    const tokenData = await this.db
-      .insert(token)
-      .values({
-        user_id: userResult.id,
-        token: v7(),
-        expired_at: dayjs().add(1, 'day').toDate(),
-      })
-      .returning();
-
-    return tokenData[0].token;
+    return await this.createToken(userResult.id);
   }
 
   public async checkEmail(dto: UserCheckEmailDto) {
@@ -87,25 +96,84 @@ export class UserService {
     });
   }
 
-  public async getByToken(tokenStr: string): Promise<User | undefined> {
+  public async myDetail(token: string): Promise<UserDetailEntities | null> {
+    const user = await this.getByToken(token);
+    if (!user) {
+      return null;
+    }
+    return {
+      id: user.id,
+      email: user.email,
+      role: user.role,
+    };
+  }
+
+  public async getByRequest(request: Request): Promise<UserEntities | null> {
+    if (request['user']) return request['user'] as UserEntities;
+
+    const tokenValue = this.extractTokenFromHeader(request);
+    if (!tokenValue) {
+      return null;
+    }
+    return this.getByToken(tokenValue);
+  }
+
+  public async getByToken(tokenValue: string): Promise<UserEntities | null> {
     const tokenData = await this.db.query.token.findFirst({
-      where: and(eq(token.token, tokenStr), gt(token.expired_at, new Date())),
+      where: and(eq(token.token, tokenValue), gt(token.expired_at, new Date())),
       with: {
         user: true,
       },
     });
 
     if (!tokenData || !tokenData.user) {
-      return undefined;
+      return null;
     }
 
-    const result = new User();
-
-    result.id = tokenData.user.id;
-    result.email = tokenData.user.email;
-    result.created_at = tokenData.user.created_at;
-    result.updated_at = tokenData.user.created_at;
+    const result: UserEntities = {
+      id: tokenData.user.id,
+      email: tokenData.user.email,
+      role: tokenData.user.role,
+      gen_limit: tokenData.user.gen_limit,
+      created_at: tokenData.user.created_at,
+      updated_at: tokenData.user.created_at,
+    };
 
     return result;
+  }
+
+  public async findOrCreateGoogleUser(profile: GoogleProfileEntities) {
+    let userResult = await this.db.query.user.findFirst({
+      where: eq(user.google_id, profile.id),
+    });
+
+    if (!userResult) {
+      let email = profile.emails.find((email) => email.verified)?.value ?? null;
+      if (email) {
+        let emailUser = await this.db.query.user.findFirst({
+          where: eq(user.email, email),
+        });
+        if (emailUser) {
+          email = null;
+        }
+      }
+
+      userResult = (
+        await this.db
+          .insert(user)
+          .values({
+            google_id: profile.id,
+            email: email,
+          })
+          .returning()
+      )[0];
+    }
+
+    return userResult;
+  }
+
+  public extractTokenFromHeader(request: Request): string | undefined {
+    const [type, token] = request.headers['authorization']?.split(' ') ?? [];
+    return type === 'Bearer' ? token : undefined;
   }
 }

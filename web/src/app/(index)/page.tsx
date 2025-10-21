@@ -1,9 +1,12 @@
-"use client";
-import { MdOutlinePets } from "react-icons/md";
-import React from "react";
+import React, { useMemo } from "react";
 import Uploader from "./_components/Uploader";
+import { useTaskList } from "@/api/task/hook";
+import { TaskResult } from "@/api/task/type";
+import { taskApi } from "@/api/task";
+import Image from "next/image";
+import CasesItem from "./_components/CasesItem";
 
-export default function () {
+export default async function () {
   // 案例数据
   const petCases: any[] = [
     {
@@ -40,6 +43,27 @@ export default function () {
     },
   ];
 
+  const petCasesTop = await taskApi
+    .list({
+      page_index: 1,
+      page_size: 1,
+      grade: 2,
+    })
+    .then((res) => {
+      if (res.list[0]) {
+        return {
+          ...res.list[0],
+          result: JSON.parse(res.list[0].result || "[]") as TaskResult,
+        };
+      }
+    });
+
+  const { list: petCasesBottom } = await taskApi.list({
+    page_index: 1,
+    page_size: 4,
+    grade: 1,
+  });
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-transparent to-primary-100 ">
       <main className="pt-20">
@@ -64,19 +88,42 @@ export default function () {
             </div>
 
             <div className="md:w-1/2 relative">
-              <div className="relative rounded-3xl overflow-hidden shadow-2xl transform rotate-2 hover:rotate-0 transition-transform duration-500">
-                <img
-                  src="https://picsum.photos/id/1025/600/500"
-                  alt="Happy dog with owner"
-                  className="w-full h-auto object-cover"
-                />
-                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-6">
-                  <div className="flex items-center gap-3">
-                    <span className="bg-green-500 text-white text-xs px-3 py-1 rounded-full">Happy</span>
-                    <span className="text-white text-sm font-medium">98% confidence</span>
+              {petCasesTop ? (
+                <div className="w-full relative rounded-3xl overflow-hidden shadow-2xl transform rotate-2 hover:rotate-0 transition-transform duration-500">
+                  <Image
+                    width={0}
+                    height={0}
+                    sizes="100vw"
+                    src={petCasesTop.path}
+                    priority={true}
+                    alt="Happy dog with owner"
+                    className="w-full h-auto! object-cover"
+                  />
+                  <div className="absolute top-4 left-4 text-white">
+                    *{petCasesTop.result.pets[0].position_desc}
+                  </div>
+                  <div className="absolute top-4 right-4 flex flex-col gap-y-2 items-end w-56">
+                    <div className="text-white text-sm font-medium">
+                      {petCasesTop.result.pets[0].emotion.emoji} {petCasesTop.result.pets[0].emotion.level}
+                    </div>
+                    <div className="text-gray-200">{petCasesTop.result.pets[0].comfort.desc}</div>
+                  </div>
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-6">
+                    <div className="flex items-center gap-3">
+                      {petCasesTop.result.pets[0].tags.map((x) => {
+                        return (
+                          <span key={x} className="bg-green-500 text-white text-xs px-3 py-1 rounded-full">
+                            {x}
+                          </span>
+                        );
+                      })}
+                      <span className="text-white text-sm font-medium">
+                        {petCasesTop.result.pets[0].emotion.confidence * 100}% confidence
+                      </span>
+                    </div>
                   </div>
                 </div>
-              </div>
+              ) : null}
 
               {/* 装饰元素 */}
               <div className="absolute -bottom-6 -left-6 w-32 h-32 bg-purple-200 rounded-full opacity-50 blur-xl"></div>
@@ -90,40 +137,16 @@ export default function () {
           <div className="container mx-auto px-4 md:px-6">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12">
               <div>
-                <h2 className="text-3xl md:text-4xl font-bold mb-4">See It In Action</h2>
+                <h2 className="text-3xl md:text-4xl font-bold mb-4">示例</h2>
                 <p className="text-gray-600 max-w-xl">
-                  Browse through these examples to see how our AI accurately detects different emotions in
-                  various pets.
+                  浏览这些例子，看看我们的人工智能是如何准确地检测到不同宠物的不同情绪的。
                 </p>
               </div>
             </div>
 
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {petCases.map((petCase) => (
-                <div
-                  key={petCase.id}
-                  className="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 group"
-                >
-                  <div className="relative overflow-hidden">
-                    <img
-                      src={petCase.imageUrl}
-                      alt={`${petCase.name} the ${petCase.type}`}
-                      className="w-full h-48 object-cover transition-transform duration-500 group-hover:scale-110"
-                    />
-                    <div className="absolute top-3 left-3">
-                      <span className={`text-xs px-3 py-1 rounded-ful`}>{petCase.emotion}</span>
-                    </div>
-                  </div>
-                  <div className="p-5">
-                    <div className="flex justify-between items-center mb-2">
-                      <h3 className="font-semibold text-lg">{petCase.name}</h3>
-                      <span className="text-sm text-gray-500">{petCase.type}</span>
-                    </div>
-                    <p className="text-sm text-gray-600">
-                      Confidence: <span className="font-medium">{petCase.confidence}%</span>
-                    </p>
-                  </div>
-                </div>
+              {petCasesBottom.map((item) => (
+                <CasesItem key={item.id} data={item}></CasesItem>
               ))}
             </div>
           </div>
