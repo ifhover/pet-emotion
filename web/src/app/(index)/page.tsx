@@ -1,67 +1,16 @@
 import React, { useMemo } from "react";
 import Uploader from "./_components/Uploader";
-import { useTaskList } from "@/api/task/hook";
 import { TaskResult } from "@/api/task/type";
 import { taskApi } from "@/api/task";
 import Image from "next/image";
 import CasesItem from "./_components/CasesItem";
 
 export default async function () {
-  // 案例数据
-  const petCases: any[] = [
-    {
-      id: 1,
-      name: "Max",
-      type: "Dog",
-      emotion: "Happy",
-      confidence: 98,
-      imageUrl: "https://picsum.photos/id/237/400/300",
-    },
-    {
-      id: 2,
-      name: "Luna",
-      type: "Cat",
-      emotion: "Relaxed",
-      confidence: 95,
-      imageUrl: "https://picsum.photos/id/40/400/300",
-    },
-    {
-      id: 3,
-      name: "Charlie",
-      type: "Dog",
-      emotion: "Anxious",
-      confidence: 92,
-      imageUrl: "https://picsum.photos/id/169/400/300",
-    },
-    {
-      id: 4,
-      name: "Bella",
-      type: "Cat",
-      emotion: "Curious",
-      confidence: 97,
-      imageUrl: "https://picsum.photos/id/96/400/300",
-    },
-  ];
-
-  const petCasesTop = await taskApi
-    .list({
-      page_index: 1,
-      page_size: 1,
-      grade: 2,
-    })
-    .then((res) => {
-      if (res.list[0]) {
-        return {
-          ...res.list[0],
-          result: JSON.parse(res.list[0].result || "[]") as TaskResult,
-        };
-      }
-    });
-
-  const { list: petCasesBottom } = await taskApi.list({
-    page_index: 1,
-    page_size: 4,
-    grade: 1,
+  const indexCases = await taskApi.indexCases().then((res) => {
+    return {
+      top: { ...res.top, result: JSON.parse(res.top.result || "[]") as TaskResult },
+      bottom_list: res.bottom_list,
+    };
   });
 
   return (
@@ -88,29 +37,30 @@ export default async function () {
             </div>
 
             <div className="md:w-1/2 relative">
-              {petCasesTop ? (
+              {indexCases.top ? (
                 <div className="w-full relative rounded-3xl overflow-hidden shadow-2xl transform rotate-2 hover:rotate-0 transition-transform duration-500">
                   <Image
                     width={0}
                     height={0}
                     sizes="100vw"
-                    src={petCasesTop.path}
+                    src={indexCases.top.path}
                     priority={true}
                     alt="Happy dog with owner"
                     className="w-full h-auto! object-cover"
                   />
                   <div className="absolute top-4 left-4 text-white">
-                    *{petCasesTop.result.pets[0].position_desc}
+                    *{indexCases.top.result.pets[0].position_desc}
                   </div>
                   <div className="absolute top-4 right-4 flex flex-col gap-y-2 items-end w-56">
                     <div className="text-white text-sm font-medium">
-                      {petCasesTop.result.pets[0].emotion.emoji} {petCasesTop.result.pets[0].emotion.level}
+                      {indexCases.top.result.pets[0].emotion.emoji}{" "}
+                      {indexCases.top.result.pets[0].emotion.level}
                     </div>
-                    <div className="text-gray-200">{petCasesTop.result.pets[0].comfort.desc}</div>
+                    <div className="text-gray-200">{indexCases.top.result.pets[0].comfort.desc}</div>
                   </div>
                   <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-6">
                     <div className="flex items-center gap-3">
-                      {petCasesTop.result.pets[0].tags.map((x) => {
+                      {indexCases.top.result.pets[0].tags.map((x) => {
                         return (
                           <span key={x} className="bg-green-500 text-white text-xs px-3 py-1 rounded-full">
                             {x}
@@ -118,7 +68,7 @@ export default async function () {
                         );
                       })}
                       <span className="text-white text-sm font-medium">
-                        {petCasesTop.result.pets[0].emotion.confidence * 100}% confidence
+                        {indexCases.top.result.pets[0].emotion.confidence * 100}% confidence
                       </span>
                     </div>
                   </div>
@@ -145,7 +95,7 @@ export default async function () {
             </div>
 
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {petCasesBottom.map((item) => (
+              {indexCases.bottom_list.map((item) => (
                 <CasesItem key={item.id} data={item}></CasesItem>
               ))}
             </div>

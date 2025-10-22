@@ -78,4 +78,10 @@ export class TaskController {
   public async update(@Param('id') id: string, @Body() dto: TaskUpdateDto) {
     return this.taskService.update(id, dto);
   }
+
+  @Get('index-cases')
+  @Public()
+  public async indexCases() {
+    return this.taskService.indexCases();
+  }
 }

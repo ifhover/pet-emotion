@@ -1,7 +1,6 @@
 import JsCookie from "js-cookie";
 import { getServerToken, removeServerToken } from "./token";
 import qs from "qs";
-import { Status } from "@/type/common";
 import { antdHelper } from "./antd-helper";
 
 export async function getToken() {

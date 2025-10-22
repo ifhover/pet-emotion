@@ -61,3 +61,12 @@ export function useTaskUpdate() {
     },
   });
 }
+
+export function useTaskIndexCases() {
+  return useQuery({
+    queryKey: ["task_index_cases"],
+    queryFn: () => {
+      return taskApi.indexCases();
+    },
+  });
+}

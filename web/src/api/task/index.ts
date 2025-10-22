@@ -24,4 +24,7 @@ export const taskApi = {
   update(data: TaskUpdateReq) {
     return request.post(`/task/update/${data.id}`, data);
   },
+  indexCases() {
+    return request.get<{ top: Task; bottom_list: Task[] }>("/task/index-cases");
+  },
 };

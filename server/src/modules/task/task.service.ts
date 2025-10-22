@@ -151,4 +151,18 @@ export class TaskService {
   public async update(id: string, dto: TaskUpdateDto) {
     await this.db.update(task).set(dto).where(eq(task.id, id));
   }
+
+  public async indexCases() {
+    return {
+      top: await this.db.query.task.findFirst({
+        where: and(eq(task.status, TaskStatus.Ok), eq(task.grade, 2)),
+        orderBy: desc(task.created_at),
+      }),
+      bottom_list: await this.db.query.task.findMany({
+        where: and(eq(task.status, TaskStatus.Ok), eq(task.grade, 1)),
+        orderBy: desc(task.created_at),
+        limit: 4,
+      }),
+    };
+  }
 }
