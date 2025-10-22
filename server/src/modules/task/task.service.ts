@@ -45,7 +45,7 @@ export class TaskService {
     const data = (
       await this.db
         .insert(task)
-        .values({ path: url, user_id: user?.id ?? null })
+        .values({ path: url, user_id: user?.id ?? null, ip: req['ip'] as undefined | string })
         .returning()
     )[0];
     await this.taskQueue.add('pet-task', {

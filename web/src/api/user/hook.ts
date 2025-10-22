@@ -1,11 +1,15 @@
 import { userApi } from "@/api/user";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { UserLoginReq } from "@/api/user/type";
 
 export function useUserLogin() {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (arg: UserLoginReq) => {
       return userApi.login(arg);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["task_gen_limit"] });
     },
   });
 }
