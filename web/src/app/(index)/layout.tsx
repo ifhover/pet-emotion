@@ -4,7 +4,7 @@ import Footer from "./_components/Footer";
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen bg-gray-100 text-gray-800 ">
+    <div className="min-h-screen bg-gray-100 text-gray-800 bg-gradient-to-br from-transparent to-primary-50">
       <Header />
       {children}
       <Footer />

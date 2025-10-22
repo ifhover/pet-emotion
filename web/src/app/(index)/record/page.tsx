@@ -8,7 +8,7 @@ import { Spin } from "antd";
 export default function RecordPage() {
   const { data: user, isPending: isPendingUser } = useUserMyDetail();
   return (
-    <div className="min-h-screen bg-gradient-to-br from-transparent to-primary-100">
+    <div className="min-h-screen ">
       <div className="container mx-auto pt-32 px-4 md:px-0">
         <Spin spinning={isPendingUser}>
           {user ? (

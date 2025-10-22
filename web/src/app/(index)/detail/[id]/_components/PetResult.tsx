@@ -24,14 +24,14 @@ export default function PetResult({ path, data }: Props) {
       {
         ...pet.emotion,
         name: "情绪指数",
-        color: "#00C950",
+        color: "#70A1D7",
         score_percent: (pet.emotion.score + 100) / 2,
         score: pet.emotion.score,
       },
       {
         ...pet.BCS,
         name: "BCS分数",
-        color: "#00B8DB",
+        color: "#A1DE93",
         score_percent: [4, 5].includes(pet.BCS.score)
           ? 100
           : Number(pet.BCS.score) > 5
@@ -43,7 +43,7 @@ export default function PetResult({ path, data }: Props) {
         name: "舒适指数",
         score_percent: pet.comfort.score,
         score: `${pet.comfort.score}%`,
-        color: "#FFC107",
+        color: "#FAB57A",
       },
     ];
   }, [pet]);
@@ -75,7 +75,7 @@ export default function PetResult({ path, data }: Props) {
                     return (
                       <div
                         key={i}
-                        className={`border-3 border-dashed border-primary-500 backdrop-brightness-110 absolute rounded-sm ${selected === i ? "border-primary-400" : "hidden"}`}
+                        className={`border-3 border-dashed border-primary-500 backdrop-brightness-130 absolute rounded-lg ${selected === i ? "border-primary-400" : "hidden"}`}
                         data-position={x.bbox_2d.join(",")}
                         style={{
                           top: y1 / 10 + "%",

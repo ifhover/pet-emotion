@@ -15,7 +15,7 @@ export default async function () {
   });
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-transparent to-primary-100 ">
+    <div className="min-h-screen">
       <main className="pt-20">
         {/* 英雄区域 */}
         <section className="container mx-auto px-4 md:px-6 py-16 md:py-24">

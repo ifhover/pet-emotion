@@ -49,7 +49,7 @@ export default function PetSelector({ result, path, selected, onChaneSelected }:
       <div className="grid grid-cols-3 gap-x-4 gap-y-2 mt-3">
         {images.map((image, index) => (
           <div
-            className={`border-2 border-dashed flex px-3 py-2 rounded-2xl transition-all ${selected === index ? "bg-primary-100 border-primary-400" : "bg-white border-transparent cursor-pointer hover:border-primary-400"}`}
+            className={`border-2 border-dashed flex px-3 py-2 rounded-2xl transition-all ${selected === index ? "bg-primary-50 border-primary-400" : "bg-white border-transparent cursor-pointer hover:border-primary-400"}`}
             key={index}
             onClick={() => onChaneSelected(index)}
           >

@@ -16,7 +16,7 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const colorPrimary = "#49cada";
+  const colorPrimary = "#e82e72";
   const style = useMemo(() => {
     return {
       "--color-primary-50": color(colorPrimary).lighten(0.7).hex(),

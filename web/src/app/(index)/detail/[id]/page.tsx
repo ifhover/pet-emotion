@@ -41,7 +41,7 @@ export default function DetailPage({ params }: { params: Promise<{ id: string }>
   }, [data]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-transparent to-primary-100">
+    <div className="min-h-screen">
       <div className="container mx-auto pt-32 px-4 md:px-0">
         {isPending ? (
           <Skeleton active />
