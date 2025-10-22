@@ -4,7 +4,7 @@ import { task } from '@/infrastructure/drizzle/schema';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
 import { S3Service } from '@/infrastructure/s3/s3.service';
-import { eq, and, inArray, gt, desc, sql } from 'drizzle-orm';
+import { eq, and, inArray, gt, desc, sql, or } from 'drizzle-orm';
 import { TaskEntities } from './entities/task.entities';
 import { BusinessError } from '@/common/exception/business-exception';
 import sharp from 'sharp';
@@ -16,6 +16,7 @@ import dayjs from 'dayjs';
 import { TaskFindAllDto } from './dto/task-find-all.dto';
 import { PageData } from '@/common/type/common';
 import { TaskUpdateDto } from './dto/task-update.dto';
+import { getRealIp } from '@/common/utils/getRealIp';
 
 @Injectable()
 export class TaskService {
@@ -45,7 +46,7 @@ export class TaskService {
     const data = (
       await this.db
         .insert(task)
-        .values({ path: url, user_id: user?.id ?? null, ip: req['ip'] as undefined | string })
+        .values({ path: url, user_id: user?.id ?? null, ip: getRealIp(req) })
         .returning()
     )[0];
     await this.taskQueue.add('pet-task', {
@@ -75,35 +76,21 @@ export class TaskService {
   public async getGenLimit(req: Request) {
     let count = 0;
     const user = await this.userService.getByRequest(req);
-    if (user) {
+    if (user) count += user.gen_limit;
+    const ip = getRealIp(req);
+    if (ip) count += 3;
+
+    if (user || ip) {
       count =
-        count +
-        user.gen_limit -
+        count -
         (await this.db.$count(
           task,
           and(
-            eq(task.user_id, user.id),
+            or(user ? eq(task.user_id, user.id) : undefined, ip ? eq(task.ip, ip) : undefined),
             inArray(task.status, [TaskStatus.Ok, TaskStatus.Processing]),
             gt(task.created_at, dayjs().startOf('day').toDate()),
           ),
         ));
-    }
-    const ip = req['ip'] as undefined | string;
-    if (ip) {
-      count =
-        count +
-        Math.max(
-          0,
-          3 -
-            (await this.db.$count(
-              task,
-              and(
-                eq(task.ip, ip),
-                inArray(task.status, [TaskStatus.Ok, TaskStatus.Processing]),
-                gt(task.created_at, dayjs().startOf('day').toDate()),
-              ),
-            )),
-        );
     }
     return count;
   }

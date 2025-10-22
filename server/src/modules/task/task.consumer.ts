@@ -60,6 +60,7 @@ export class TaskConsumer extends WorkerHost {
                 text: `
 请检测图像中所有宠物(仅限猫、狗)
 **格式：** [xmin, ymin, xmax, ymax]，归一化到 0-1000 范围
+如没检测到宠物，则pets返回为空数组
 **请使用以下 JSON 格式严格输出:**
 \`\`\`json
 {
@@ -82,7 +83,12 @@ export class TaskConsumer extends WorkerHost {
             messages,
           });
         const response1 = await sendMessage(messages);
-        const json = JSON.parse(response1.choices[0].message.content!);
+        let json;
+        try {
+          json = JSON.parse(response1.choices[0].message.content!);
+        } catch (error) {
+          json = { pets: [] };
+        }
 
         if (json.pets.length === 0) {
           this.taskService.complete({

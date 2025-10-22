@@ -3,7 +3,7 @@ import { Skeleton, Spin } from "antd";
 export default function PetLoading({ path }: { path: string }) {
   return (
     <div className="pb-10 flex gap-x-10 items-start">
-      <div className="flex gap-x-10 items-start">
+      <div className="flex gap-x-10 items-start w-full max-w-5xl">
         <div className="w-2/6 bg-white/50 backdrop-blur-md rounded-2xl shadow-xl overflow-hidden">
           <div className="relative">
             <img className="w-full object-cover" src={path || ""} alt="" />

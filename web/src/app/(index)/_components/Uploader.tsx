@@ -60,9 +60,9 @@ export default function Uploader() {
                 className="hidden"
                 onChange={handleFileChange}
               />
-              <button className="mt-4 bg-primary-600 text-white px-6 py-3 rounded-full transform shadow-md cursor-pointer">
+              <div className="inline-block mt-4 bg-primary-600 text-white px-6 py-3 rounded-full transform shadow-md cursor-pointer">
                 分析情绪
-              </button>
+              </div>
             </div>
           </label>
         </Spin>
