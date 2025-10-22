@@ -8,7 +8,7 @@ import CasesItem from "./_components/CasesItem";
 export default async function () {
   const indexCases = await taskApi.indexCases().then((res) => {
     return {
-      top: { ...res.top, result: JSON.parse(res.top.result || "[]") as TaskResult },
+      top: res.top ? { ...res.top, result: JSON.parse(res.top.result || "[]") as TaskResult } : null,
       bottom_list: res.bottom_list,
     };
   });
