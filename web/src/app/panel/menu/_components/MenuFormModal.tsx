@@ -2,7 +2,7 @@ import { Modal, Button, App, Input, TreeSelect, Spin } from "antd";
 import { Form } from "antd";
 import { useEffect } from "react";
 import { useMenu, useMenuList, useMenuSave } from "@/api/menu/hook";
-import { Menu } from "@server/modules/menu/type";
+import { Menu } from "@/api/menu/type";
 
 type Props = {
   id?: string;

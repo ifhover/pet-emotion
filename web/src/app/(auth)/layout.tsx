@@ -1,5 +1,6 @@
 import Logo from "@/components/Logo";
 import "./style.scss";
+import { Suspense } from "react";
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -8,7 +9,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         <div className="pt-10 pb-5">
           <Logo className="text-3xl!" />
         </div>
-        {children}
+        <Suspense>{children}</Suspense>
       </div>
     </div>
   );
