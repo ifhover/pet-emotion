@@ -80,7 +80,7 @@ export default function LoginPage() {
               <Input.Password placeholder="请输入密码" />
             </Form.Item>
             <Form.Item name="turnstile_token" rules={[{ required: true, message: "请先完成校验" }]}>
-              <TurnstileInput />
+              <TurnstileInput ref={turnstileRef} />
             </Form.Item>
           </Form>
           <Button size="large" type="primary" block onClick={() => form.submit()} loading={loadingLogin}>
