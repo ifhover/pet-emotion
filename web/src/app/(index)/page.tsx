@@ -4,6 +4,7 @@ import { TaskResult } from "@/api/task/type";
 import { taskApi } from "@/api/task";
 import Image from "next/image";
 import CasesItem from "./_components/CasesItem";
+import Link from "next/link";
 
 export default async function () {
   const indexCases = await taskApi.indexCases().then((res) => {
@@ -38,7 +39,11 @@ export default async function () {
 
             <div className="md:w-1/2 relative">
               {indexCases.top ? (
-                <div className="w-full relative rounded-3xl overflow-hidden shadow-2xl transform rotate-2 hover:rotate-0 transition-transform duration-500">
+                <Link
+                  href={`/detail/${indexCases.top.id}`}
+                  prefetch
+                  className="block w-full relative rounded-3xl overflow-hidden shadow-2xl transform rotate-2 hover:rotate-0 transition-transform duration-500"
+                >
                   <Image
                     width={0}
                     height={0}
@@ -72,7 +77,7 @@ export default async function () {
                       </span>
                     </div>
                   </div>
-                </div>
+                </Link>
               ) : null}
 
               {/* 装饰元素 */}

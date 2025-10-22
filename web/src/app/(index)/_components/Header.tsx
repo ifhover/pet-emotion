@@ -9,6 +9,7 @@ import { Dropdown, Spin } from "antd";
 import jsCookie from "js-cookie";
 import { useRouter } from "next/navigation";
 import { useTaskGenLimit } from "@/api/task/hook";
+import { removeToken } from "@/utils/request";
 
 export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -17,18 +18,18 @@ export default function Header() {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 10);
     };
+    handleScroll();
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const router = useRouter();
 
-  const { data: user, refetch: refetchUser, isPending: loadingUser } = useUserMyDetail();
+  const { data: user, refetch: refetchUser, isPending: loadingUser, status } = useUserMyDetail();
   const { data: limit, isPending: loadingLimit } = useTaskGenLimit();
 
   useEffect(() => {
-    if (!user) {
-      // removeToken();
+    if (status === "success" && !user) {
+      removeToken();
     }
   }, [user]);
 

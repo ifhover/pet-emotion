@@ -18,8 +18,3 @@ export function AppFuncInject() {
 
   return null;
 }
-
-// 移除token
-export function removeToken() {
-  Cookies.remove("token");
-}
