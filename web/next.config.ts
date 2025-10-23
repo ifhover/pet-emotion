@@ -6,7 +6,7 @@ const nextConfig: NextConfig = {
   reactStrictMode: false,
   experimental: { viewTransition: true },
   images: {
-    remotePatterns: [new URL("https://static.goee.net/**")],
+    remotePatterns: [new URL(`${process.env.NEXT_PUBLIC_OSS_DOMAIN}/**`)],
   },
 };
 
