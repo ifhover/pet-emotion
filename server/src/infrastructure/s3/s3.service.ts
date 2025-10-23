@@ -10,12 +10,12 @@ export class S3Service {
 
   constructor(private readonly configService: ConfigService) {
     this.s3 = new S3Client({
-      endpoint: `https://${this.configService.get('S3_REGION')}.aliyuncs.com`,
+      endpoint: this.configService.get('S3_ENDPOINT'),
       region: this.configService.get('S3_REGION'),
       credentials: {
-        accessKeyId: this.configService.get('ALIYUN_ACCESS_KEY_ID')!,
-        secretAccessKey: this.configService.get('ALIYUN_ACCESS_KEY_SCERT')!,
-        sessionToken: this.configService.get('ALIYUN_SECURITY_TOKEN') || undefined,
+        accessKeyId: this.configService.get('S3_ACCESS_KEY')!,
+        secretAccessKey: this.configService.get('S3_SCRET_ACCESS_KEY')!,
+        sessionToken: this.configService.get('S3_SESSION_TOKEN') || undefined,
       },
     });
   }
