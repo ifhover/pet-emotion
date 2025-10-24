@@ -12,10 +12,14 @@ export class AuthController {
     private readonly configService: ConfigService,
   ) {}
 
-  @Get('google')
-  @UseGuards(GoogleAuthGuard)
+  @Get('google/config')
   @Public()
-  public google() {}
+  public googleConfig() {
+    return {
+      client_id: this.configService.get<string>('GOOGLE_CLIENT_ID'),
+      redirect_uri: this.configService.get<string>('GOOGLE_CALLBACK_URL'),
+    };
+  }
 
   @Get('google/callback')
   @UseGuards(GoogleAuthGuard)
